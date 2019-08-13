@@ -5,17 +5,36 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 public class Configuration {
 	
 	private static Integer particleCount;
 	private static Integer areaBorderLength;
-	private static final double INTERACTION_RADIUS = 1; // CAMBIAR!
+	private static Double interactionRadius;
 	private static List<Particle> particles;
+	private static Integer selectedParticleId;
 	
 	public static void parseConfiguration() {
+		requestParameters();
 		parseStaticConfiguration();
 		parseDynamicConfiguration();
+	}
+	
+	private static void requestParameters() {
+		Scanner scanner = new Scanner(System.in);
+		
+	    System.out.println("Enter Interaction Radius: ");
+	    while(interactionRadius == null) {
+	    	interactionRadius = stringToDouble(scanner.nextLine());
+	    }
+	    
+	    System.out.println("Enter Selected Particle Id: ");
+	    while(selectedParticleId == null) {
+	    	selectedParticleId = stringToInt(scanner.nextLine());
+	    }
+	    
+	    scanner.close();
 	}
 	
 	private static void parseStaticConfiguration() {
@@ -123,11 +142,15 @@ public class Configuration {
 	}
 	
 	public static double getInteractionRadius() {
-		return INTERACTION_RADIUS;
+		return interactionRadius;
 	}
 
 	public static List<Particle> getParticles() {
 		return Collections.unmodifiableList(particles);
+	}
+	
+	public static int getSelectedParticleId() {
+		return selectedParticleId;
 	}
 
 }

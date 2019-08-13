@@ -15,7 +15,6 @@ public class Grid {
 		this.grid = new ArrayList<>();
 		
 		int m = calculateMaximumGridSectionBorderCount(particles);
-		System.out.println("M: " + m); // SACAR
 		for(int i = 0; i < m; i++) {
 			grid.add(new ArrayList<>());
 			for(int j = 0; j < m; j++) {
@@ -29,14 +28,6 @@ public class Grid {
 			int particleGridSectionX = (int) ((areaBorderLength - p.getPosition().y) / gridSectionBorderLength);
 			grid.get(particleGridSectionX).get(particleGridSectionY).addParticle(p);
 		}
-		// SACAR
-		for(List<GridSection> gridRow : grid)
-			for(GridSection gridSection : gridRow) {
-				System.out.println(gridSection.getX() + " " + gridSection.getY());
-				for(Particle p : gridSection.getParticles())
-					System.out.println(p);
-			}
-		// SACAR
 	}
 	
 	public void calculateParticlesNeighbors() {
@@ -62,7 +53,7 @@ public class Grid {
 						//}
 					}
 					
-					/* Particles with neighboring grid section's particles */ // MEJORAR?
+					/* Particles with neighboring grid section's particles */
 					if(gridSection.getX() > 0)
 						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() - 1).get(gridSection.getY()));
 					if(gridSection.getY() > 0)
@@ -99,7 +90,8 @@ public class Grid {
 
 	private int calculateMaximumGridSectionBorderCount(List<Particle> particles) {
 		double[] r = largestRadiusPair(particles);
-		return (int) (areaBorderLength / (interactionRadius + r[0] + r[1]));
+		int maxGridSectionBorderCount = (int) (areaBorderLength / (interactionRadius + r[0] + r[1]));
+		return (maxGridSectionBorderCount == 0)? 1 : maxGridSectionBorderCount;
 	}
 	
 	private double[] largestRadiusPair(List<Particle> particles) {
@@ -118,6 +110,25 @@ public class Grid {
 			}
 		}
 		return r;
+	}
+	
+	public void printParticlesByGridSection() {
+		for(List<GridSection> gridRow : grid) {
+			for(GridSection gridSection : gridRow) {
+				System.out.println("Particles in (" + gridSection.getX() + ", " + gridSection.getY() + "):");
+				for(Particle p : gridSection.getParticles())
+					System.out.println(p.getId() + ": (" + p.getPosition().x + ", " + p.getPosition().y + ")");
+			}
+		}
+	}
+	
+	public void printParticlesWithNeighbors() {
+		for(Particle p : Configuration.getParticles()) {
+			System.out.println("Neighbors for particle " + p.getId() + "at (" + p.getPosition().x + ", " + p.getPosition().y + "):");
+			for(Particle n : p.getNeighbors()) {
+				System.out.println(n.getId());
+			}
+		}
 	}
 	
 	private class GridSection {
