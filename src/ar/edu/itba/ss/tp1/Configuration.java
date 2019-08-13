@@ -10,6 +10,7 @@ public class Configuration {
 	
 	private static Integer particleCount;
 	private static Integer areaBorderLength;
+	private static final double INTERACTION_RADIUS = 1; // CAMBIAR!
 	private static List<Particle> particles;
 	
 	public static void parseConfiguration() {
@@ -51,7 +52,7 @@ public class Configuration {
 				if(line == null)
 					failWithMessage("Particles do not match particle count.");
 				String[] attributes = line.split(" ");
-				setDynamicParticleAttributes(particles.get(i), attributes);
+				setDynamicParticleAttributes(particles.get(i), attributes); // VALIDAR QUE NO SE SUPERPONGAN
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -119,6 +120,10 @@ public class Configuration {
 
 	public static int getAreaBorderLength() {
 		return areaBorderLength;
+	}
+	
+	public static double getInteractionRadius() {
+		return INTERACTION_RADIUS;
 	}
 
 	public static List<Particle> getParticles() {
