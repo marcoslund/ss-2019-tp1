@@ -99,18 +99,18 @@ public class Grid {
 
 	private int calculateMaximumGridSectionBorderCount(List<Particle> particles) {
 		double[] r = largestRadiusPair(particles);
-		return (int) Math.floor(areaBorderLength / (interactionRadius + r[0] + r[1])); // HACE FALTA FLOOR? CAST A INT SOLO?
+		return (int) (areaBorderLength / (interactionRadius + r[0] + r[1]));
 	}
 	
-	private double[] largestRadiusPair(List<Particle> particles) { // Y SI HAY UNA SOLA PARTICULA?
+	private double[] largestRadiusPair(List<Particle> particles) {
 		double[] r = new double[2];
-		for(Particle p : particles) {
-			double radius = p.getRadius();
-			if(((Double) r[0]).compareTo(0.0) == 0)
-				r[0] = radius;
-			else if(((Double) r[1]).compareTo(0.0) == 0)
-				r[1] = radius;
-			else if(r[0] < radius) {
+		r[0] = particles.get(0).getRadius();
+		if(particles.size() == 1)
+			return r;
+		r[1] = particles.get(1).getRadius();
+		for(int i = 2; i < particles.size(); i++) {
+			double radius = particles.get(i).getRadius();
+			if(r[0] < radius) {
 				r[1] = r[0];
 				r[0] = radius;
 			} else if(r[1] < radius) {
