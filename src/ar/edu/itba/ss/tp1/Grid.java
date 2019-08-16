@@ -24,66 +24,102 @@ public class Grid {
 		
 		double gridSectionBorderLength = ((double) areaBorderLength) / m;
 		for(Particle p : particles) {
-			int particleGridSectionY = (int) (p.getPosition().x / gridSectionBorderLength);
-			int particleGridSectionX = (int) ((areaBorderLength - p.getPosition().y) / gridSectionBorderLength);
-			grid.get(particleGridSectionX).get(particleGridSectionY).addParticle(p);
+			int particleGridSectionRow = (int) ((areaBorderLength - p.getPosition().y) / gridSectionBorderLength);
+			int particleGridSectionColumn = (int) (p.getPosition().x / gridSectionBorderLength);
+			grid.get(particleGridSectionRow).get(particleGridSectionColumn).addParticle(p);
 		}
 	}
 	
-	public void calculateParticlesNeighbors() {
+	public void calculateAllParticlesNeighbors() {
 		// VACIAR LOS GRID SECTIONS Y NEIGHBORS DE CADA PARTICLE
 		for(List<GridSection> gridRow : grid) {
 			for(GridSection gridSection : gridRow) {
-				
 				for(int i = 0; i < gridSection.getParticles().size(); i++) {
-					Particle p1 = gridSection.getParticles().get(i);
-					
-					/* Particles within the same grid section */
-					for(int j = i + 1; j < gridSection.getParticles().size(); j++) {
-						Particle p2 = gridSection.getParticles().get(j);
-						//if(!p1.getNeighbors().contains(p2)) {
-							double borderToBorderDistance = Math.sqrt(
-									Math.pow(Math.abs(p1.getPosition().x - p2.getPosition().x), 2) 
-									+ Math.pow(Math.abs(p1.getPosition().y - p2.getPosition().y), 2))
-										- p1.getRadius() - p2.getRadius();
-							if(borderToBorderDistance <= interactionRadius) {
-								p1.addNeighbor(p2);
-								p2.addNeighbor(p1);
-							}
-						//}
-					}
-					
-					/* Particles with neighboring grid section's particles */
-					if(gridSection.getX() > 0)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() - 1).get(gridSection.getY()));
-					if(gridSection.getY() > 0)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX()).get(gridSection.getY() - 1));
-					if(gridSection.getY() < gridRow.size() - 1)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX()).get(gridSection.getY() + 1));
-					if(gridSection.getX() < grid.size() - 1)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() + 1).get(gridSection.getY()));
-					if(gridSection.getX() > 0 && gridSection.getY() > 0)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() - 1).get(gridSection.getY() - 1));
-					if(gridSection.getX() > 0 && gridSection.getY() < gridRow.size() - 1)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() - 1).get(gridSection.getY() + 1));
-					if(gridSection.getX() < grid.size() - 1 && gridSection.getY() > 0)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() + 1).get(gridSection.getY() - 1));
-					if(gridSection.getX() < grid.size() - 1 && gridSection.getY() < gridRow.size() - 1)
-						calculateParticleNeighborsWithGridSection(p1, grid.get(gridSection.getX() + 1).get(gridSection.getY() + 1));
+					calculateParticleNeighbors(gridSection.getParticles().get(i), gridSection);
 				}
 			}
 		}
 	}
 	
-	private void calculateParticleNeighborsWithGridSection(Particle p1, GridSection gridSection) {
+	private void calculateParticleNeighbors(Particle p, GridSection gridSection) {
+		int middleColumnIndex = gridSection.getColumn();
+		int middleRowIndex = gridSection.getRow();
+		
+		/* Particles within the same grid section */
+		calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(middleRowIndex).get(middleColumnIndex));
+		if(getM() == 1)
+			return;
+		
+		/* Particles with neighboring grid section's particles */
+		if(!Configuration.isPBCMode() || getM() <= 2) {
+			int leftColumnIndex = gridSection.getColumn() - 1;
+			int rightColumnIndex = gridSection.getColumn() + 1;
+			int topRowIndex = gridSection.getRow() - 1;
+			int bottomRowIndex = gridSection.getRow() + 1;
+			
+			if(topRowIndex >= 0)
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(topRowIndex).get(middleColumnIndex));
+			if(leftColumnIndex >= 0)
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(middleRowIndex).get(leftColumnIndex));
+			if(rightColumnIndex < grid.get(0).size())
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(middleRowIndex).get(rightColumnIndex));
+			if(bottomRowIndex < grid.size())
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(bottomRowIndex).get(middleColumnIndex));
+			if(topRowIndex >= 0 && leftColumnIndex >= 0)
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(topRowIndex).get(leftColumnIndex));
+			if(topRowIndex >= 0 && rightColumnIndex < grid.get(0).size())
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(topRowIndex).get(rightColumnIndex));
+			if(bottomRowIndex < grid.size() && leftColumnIndex >= 0)
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(bottomRowIndex).get(leftColumnIndex));
+			if(bottomRowIndex < grid.size() && rightColumnIndex < grid.get(0).size())
+				calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(bottomRowIndex).get(rightColumnIndex));
+		} else {
+			int leftColumnIndex = (((gridSection.getColumn() - 1) % getM()) + getM()) % getM();
+			int rightColumnIndex = (((gridSection.getColumn() + 1) % getM()) + getM()) % getM();
+			int topRowIndex = (((gridSection.getRow() - 1) % getM()) + getM()) % getM();
+			int bottomRowIndex = (((gridSection.getRow() + 1) % getM()) + getM()) % getM();
+			
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(topRowIndex).get(middleColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(middleRowIndex).get(leftColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(middleRowIndex).get(rightColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(bottomRowIndex).get(middleColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(topRowIndex).get(leftColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(topRowIndex).get(rightColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(bottomRowIndex).get(leftColumnIndex));
+			calculateParticleNeighborsWithGridSection(p, middleRowIndex, middleColumnIndex, grid.get(bottomRowIndex).get(rightColumnIndex));
+		}
+	}
+	
+	private void calculateParticleNeighborsWithGridSection(Particle p1, int particleGridSectionRow, int particleGridSectionColumn, 
+			GridSection gridSection) {
 		for(Particle p2 : gridSection.getParticles()) {
-			double borderToBorderDistance = Math.sqrt(
-					Math.pow(Math.abs(p1.getPosition().x - p2.getPosition().x), 2) 
-					+ Math.pow(Math.abs(p1.getPosition().y - p2.getPosition().y), 2))
-						- p1.getRadius() - p2.getRadius();
-			if(borderToBorderDistance <= interactionRadius) {
-				p1.addNeighbor(p2);
-				//p2.addNeighbor(p1);
+			if(!p1.equals(p2)) {
+				
+				double horizontalDistance = Math.abs(p1.getPosition().x - p2.getPosition().x);
+				if(Math.abs(particleGridSectionColumn - gridSection.getColumn()) >= 2) {
+					/* PBC mode must be on */
+					horizontalDistance = areaBorderLength - horizontalDistance;
+				} else if(Configuration.isPBCMode()) {
+					/* M must be 1 or 2 */
+					horizontalDistance = Math.min(horizontalDistance, areaBorderLength - horizontalDistance);
+				}
+				
+				double verticalDistance = Math.abs(p1.getPosition().y - p2.getPosition().y);
+				if(Math.abs(particleGridSectionRow - gridSection.getRow()) >= 2) {
+					/* PBC mode must be on */
+					verticalDistance = areaBorderLength - verticalDistance;
+				} else if(Configuration.isPBCMode()) {
+					/* M must be 1 or 2 */
+					verticalDistance = Math.min(verticalDistance, areaBorderLength - verticalDistance);
+				}
+				
+				double borderToBorderDistance = Math.sqrt(
+						Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2))
+							- p1.getRadius() - p2.getRadius();
+				if(borderToBorderDistance <= interactionRadius) {
+					p1.addNeighbor(p2);
+					//p2.addNeighbor(p1);
+				}
 			}
 		}
 	}
@@ -115,7 +151,7 @@ public class Grid {
 	public void printParticlesByGridSection() {
 		for(List<GridSection> gridRow : grid) {
 			for(GridSection gridSection : gridRow) {
-				System.out.println("Particles in (" + gridSection.getX() + ", " + gridSection.getY() + "):");
+				System.out.println("Particles in (" + gridSection.getRow() + ", " + gridSection.getColumn() + "):");
 				for(Particle p : gridSection.getParticles())
 					System.out.println(p.getId() + ": (" + p.getPosition().x + ", " + p.getPosition().y + ")");
 			}
@@ -131,15 +167,23 @@ public class Grid {
 		}
 	}
 	
+	public int getM() {
+		return grid.size();
+	}
+	
+	public double getGridSectionLength() {
+		return areaBorderLength / (double) getM();
+	}
+	
 	private class GridSection {
 		
-		private int x;
-		private int y;
+		private int row;
+		private int column;
 		private List<Particle> particles;
 		
-		public GridSection(int x, int y) {
-			this.x = x;
-			this.y = y;
+		public GridSection(int row, int column) {
+			this.row = row;
+			this.column = column;
 			particles = new ArrayList<>();
 		}
 		
@@ -151,12 +195,12 @@ public class Grid {
 			particles.remove(p);
 		}
 		
-		public int getX() {
-			return x;
+		public int getRow() {
+			return row;
 		}
 		
-		public int getY() {
-			return y;
+		public int getColumn() {
+			return column;
 		}
 		
 		public List<Particle> getParticles() {

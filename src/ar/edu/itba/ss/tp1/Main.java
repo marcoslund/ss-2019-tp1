@@ -4,13 +4,19 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
 	public static void main(String[] args) {
 		Configuration.parseConfiguration();
 		Grid grid = new Grid(Configuration.getAreaBorderLength(), Configuration.getInteractionRadius(), Configuration.getParticles());
-		grid.calculateParticlesNeighbors();
+		
+		long startTime = System.nanoTime();
+		grid.calculateAllParticlesNeighbors();
+		long endTime = System.nanoTime();
+		System.out.println("Process done in " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime) + " ms.");
+		
 		generateNeighborsOutputFile(Configuration.getParticles());
 		generateOvitoOutputFile(Configuration.getParticles());
 	}
