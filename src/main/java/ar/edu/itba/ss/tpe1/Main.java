@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.tp1;
+package ar.edu.itba.ss.tpe1;
 
 import java.io.File;
 import java.io.FileWriter;
