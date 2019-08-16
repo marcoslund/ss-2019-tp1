@@ -15,7 +15,7 @@ public class Main {
 		long startTime = System.nanoTime();
 		grid.calculateAllParticlesNeighbors();
 		long endTime = System.nanoTime();
-		System.out.println("Process done in " + TimeUnit.NANOSECONDS.toNanos(endTime - startTime) + " ns.");
+		System.out.println("Process done in " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime) + " ms.");
 		
 		generateNeighborsOutputFile(Configuration.getParticles());
 		generateOvitoOutputFile(Configuration.getParticles());
@@ -68,11 +68,14 @@ public class Main {
 	private static void writeOvitoParticle(FileWriter fw, Particle particle) throws IOException {
 		fw.write(particle.getId() + " " + particle.getRadius() + " " + particle.getPosition().x + " "
 				+ particle.getPosition().y + " " + particle.getVelocity().x + " " + particle.getVelocity().y + " ");
-		if(particle.getId() == Configuration.getSelectedParticleId())
-			fw.write("0.25 0.9 0.25");
-		else if(Configuration.getParticles().get(Configuration.getSelectedParticleId()).getNeighbors().contains(particle))
-			fw.write("0.9 0.3 0.25");
-		else
+		if(!Configuration.isRandomInput()) {
+			if(particle.getId() == Configuration.getSelectedParticleId())
+				fw.write("0.25 0.9 0.25");
+			else if(Configuration.getParticles().get(Configuration.getSelectedParticleId()).getNeighbors().contains(particle))
+				fw.write("0.9 0.3 0.25");
+			else
+				fw.write("1 1 1");
+		} else
 			fw.write("1 1 1");
 		fw.write('\n');
 	}

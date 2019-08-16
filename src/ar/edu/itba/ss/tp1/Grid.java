@@ -15,9 +15,9 @@ public class Grid {
 		this.grid = new ArrayList<>();
 		
 		int m = calculateMaximumGridSectionBorderCount(particles);
-		if(Configuration.getM() != null) {
+		if(!Configuration.isOptimalM()) {
 			if(Configuration.getM() > m)
-				System.out.println("Invalid Input M.");
+				System.out.println("M violates Cell Index Method Algorithm.");
 			m = Configuration.getM();
 		}
 		

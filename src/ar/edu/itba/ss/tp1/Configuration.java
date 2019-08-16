@@ -15,15 +15,17 @@ import java.util.stream.Collectors;
 
 public class Configuration {
 	
-	private static String staticFileName = "Static100.txt";
-	private static String dynamicFileName = "Dynamic100.txt";
+	private static String staticFileName = "static_config.txt";
+	private static String dynamicFileName = "dynamic_config.txt";
 	private static Integer particleCount;
 	private static Integer areaBorderLength;
 	private static Double interactionRadius;
 	private static List<Particle> particles;
 	private static Integer selectedParticleId;
 	private static boolean isPBCMode;
+	private static boolean isOptimalM;
 	private static Integer m = null;
+	private static boolean isRandomInput;
 	
 	public static void parseConfiguration() {
 		requestParameters();
@@ -35,42 +37,56 @@ public class Configuration {
 		Scanner scanner = new Scanner(System.in);
 		
 	    System.out.println("Enter Interaction Radius: ");
-	    while(interactionRadius == null) {
+	    while(interactionRadius == null || interactionRadius <= 0) {
 	    	interactionRadius = stringToDouble(scanner.nextLine());
 	    }
 	    
-	    System.out.println("Enter Selected Particle Id: ");
-	    while(selectedParticleId == null) {
-	    	selectedParticleId = stringToInt(scanner.nextLine());
+	    System.out.println("Enter M [0 -> Optimal]:");
+    	Integer selectedM = null;
+	    while(selectedM == null || selectedM < 0) {
+	    	selectedM = stringToInt(scanner.nextLine());
 	    }
+	    m = selectedM;
+	    isOptimalM = (m == 0);
 	    
 	    System.out.println("Enter Mode [0 -> Non-PBC; 1 -> Periodic Boundary Conditions]: ");
 	    Integer selectedMode = null;
-	    while(selectedMode == null) {
+	    while(selectedMode == null || (selectedMode != 0 && selectedMode != 1)) {
 	    	selectedMode = stringToInt(scanner.nextLine());
 	    }
 	    isPBCMode = selectedMode != 0;
 	    
 	    System.out.println("Enter Mode [0 -> Non-Random Input; 1 -> Random-Input]: ");
 	    Integer selectedInputMode = null;
-	    while(selectedInputMode == null) {
+	    while(selectedInputMode == null || (selectedInputMode != 0 && selectedInputMode != 1)) {
 	    	selectedInputMode = stringToInt(scanner.nextLine());
 	    }
-	    if(selectedInputMode == 1) {
+	    isRandomInput = (selectedInputMode == 1);
+	    if(isRandomInput) {
 	    	System.out.println("Enter Particle Count:");
 	    	Integer selectedParticleCount = null;
 		    while(selectedParticleCount == null) {
 		    	selectedParticleCount = stringToInt(scanner.nextLine());
 		    }
 		    
-		    System.out.println("Enter M:");
-	    	Integer selectedM = null;
-		    while(selectedM == null) {
-		    	selectedM = stringToInt(scanner.nextLine());
+		    System.out.println("Enter Area Length:");
+	    	Integer selectedAreaLength = null;
+		    while(selectedAreaLength == null || selectedAreaLength <= 0) {
+		    	selectedAreaLength = stringToInt(scanner.nextLine());
 		    }
-		    m = selectedM;
 		    
-	    	generateRandomInputFiles(selectedParticleCount, 20, 0.25); // "HARDCODEADO"
+		    System.out.println("Enter Particle Radius:");
+	    	Double selectedParticleRadius = null;
+		    while(selectedParticleRadius == null || selectedParticleRadius <= 0) {
+		    	selectedParticleRadius = stringToDouble(scanner.nextLine());
+		    }
+		    
+		    generateRandomInputFiles(selectedParticleCount, selectedAreaLength, selectedParticleRadius);
+	    } else {
+	    	System.out.println("Enter Selected Particle Id: ");
+		    while(selectedParticleId == null) {
+		    	selectedParticleId = stringToInt(scanner.nextLine());
+		    }
 	    }
 	    
 	    scanner.close();
@@ -187,7 +203,6 @@ public class Configuration {
 	}
 	
 	private static void generateRandomStaticInputFile(int particleCount, int areaBorderLength, double radius) {
-		staticFileName = "random_static_config.txt";
 		File staticInputFile = new File(staticFileName);
 		staticInputFile.delete();
 		try(FileWriter fw = new FileWriter(staticInputFile)) {
@@ -204,7 +219,6 @@ public class Configuration {
 	}
 	
 	private static void generateRandomDynamicInputFile(int particleCount, int areaBorderLength, double radius) {
-		dynamicFileName = "random_dynamic_config.txt";
 		File dynamicInputFile = new File(dynamicFileName);
 		dynamicInputFile.delete();
 		try(FileWriter fw = new FileWriter(dynamicInputFile)) {
@@ -250,6 +264,14 @@ public class Configuration {
 	
 	public static Integer getM() {
 		return m;
+	}
+	
+	public static boolean isOptimalM() {
+		return isOptimalM;
+	}
+	
+	public static boolean isRandomInput() {
+		return isRandomInput;
 	}
 
 }
