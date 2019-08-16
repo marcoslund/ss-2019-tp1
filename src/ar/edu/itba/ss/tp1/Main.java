@@ -15,7 +15,7 @@ public class Main {
 		long startTime = System.nanoTime();
 		grid.calculateAllParticlesNeighbors();
 		long endTime = System.nanoTime();
-		System.out.println("Process done in " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime) + " ms.");
+		System.out.println("Process done in " + TimeUnit.NANOSECONDS.toNanos(endTime - startTime) + " ns.");
 		
 		generateNeighborsOutputFile(Configuration.getParticles());
 		generateOvitoOutputFile(Configuration.getParticles());

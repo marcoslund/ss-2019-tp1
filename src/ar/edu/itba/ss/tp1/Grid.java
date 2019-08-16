@@ -15,6 +15,12 @@ public class Grid {
 		this.grid = new ArrayList<>();
 		
 		int m = calculateMaximumGridSectionBorderCount(particles);
+		if(Configuration.getM() != null) {
+			if(Configuration.getM() > m)
+				System.out.println("Invalid Input M.");
+			m = Configuration.getM();
+		}
+		
 		for(int i = 0; i < m; i++) {
 			grid.add(new ArrayList<>());
 			for(int j = 0; j < m; j++) {

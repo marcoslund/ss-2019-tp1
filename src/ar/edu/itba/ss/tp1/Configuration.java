@@ -23,6 +23,7 @@ public class Configuration {
 	private static List<Particle> particles;
 	private static Integer selectedParticleId;
 	private static boolean isPBCMode;
+	private static Integer m = null;
 	
 	public static void parseConfiguration() {
 		requestParameters();
@@ -61,6 +62,14 @@ public class Configuration {
 		    while(selectedParticleCount == null) {
 		    	selectedParticleCount = stringToInt(scanner.nextLine());
 		    }
+		    
+		    System.out.println("Enter M:");
+	    	Integer selectedM = null;
+		    while(selectedM == null) {
+		    	selectedM = stringToInt(scanner.nextLine());
+		    }
+		    m = selectedM;
+		    
 	    	generateRandomInputFiles(selectedParticleCount, 20, 0.25); // "HARDCODEADO"
 	    }
 	    
@@ -237,6 +246,10 @@ public class Configuration {
 	
 	public static boolean isPBCMode() {
 		return isPBCMode;
+	}
+	
+	public static Integer getM() {
+		return m;
 	}
 
 }
